@@ -1,4 +1,4 @@
-PY = C:/Python38/python.exe
+PY = py
 
 run:
-	$(PY) ./src/main.py	
+	$(PY) ./src/main.py	./examples/$(example)
