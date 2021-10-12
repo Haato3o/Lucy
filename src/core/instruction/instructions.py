@@ -32,10 +32,6 @@ defaultInstructions: List[Instruction] = [
         args = (MutableData, MutableData)
     ),
     Instruction(
-        mnemonic = "ADD",
-        args = (MutableData, MutableData)
-    ),
-    Instruction(
         mnemonic = "MUL",
         args = (MutableData, MutableData)
     ),
