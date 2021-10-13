@@ -3,46 +3,8 @@ from dataclasses import dataclass
 from typing import List, Any, Dict, Union, Callable
 from .data import MutableData
 from .operations import *
-
-enum_counter = 0
-def auto() -> int:
-    global enum_counter
-    tmp = enum_counter
-    enum_counter += 1
-    return tmp
-
-class Operation(Enum):
-    MOV     = auto()
-    PUSH    = auto()
-    POP     = auto()
-    ADD     = auto()
-    SUB     = auto()
-    MUL     = auto()
-    DIV     = auto()
-    MOD     = auto()
-    JNE     = auto()
-    JMP     = auto()
-    JE      = auto()
-    INC     = auto()
-    OR      = auto()
-    AND     = auto()
-    XOR     = auto()
-    CALL    = auto()
-    RET     = auto()
-    STDOUT  = auto()
-    STDIN   = auto()
-    DMP     = auto()
-    MALLOC  = auto()
-    FREE    = auto()
-
-@dataclass
-class Instruction:
-    operation: Operation
-    signature: tuple
-    implementation: Callable
-
-    def __call__(self) -> Any:
-        return self.implementation()
+from .instruction import Instruction
+from .operation import Operation
 
 _operations: List[Instruction] = [
     # mov   reg, reg
@@ -135,6 +97,11 @@ _operations: List[Instruction] = [
         signature = (MutableData, MutableData),
         implementation = op_mod
     ),
+    Instruction(
+        operation = Operation.CMP,
+        signature = (MutableData, Any),
+        implementation = op_cmp
+    ),
     # jne  reg
     Instruction(
         operation = Operation.JNE,
@@ -159,6 +126,18 @@ _operations: List[Instruction] = [
         signature = (int, ),
         implementation = op_jmp
     ),
+    # dmp   reg
+    Instruction(
+        operation = Operation.DMP,
+        signature = (MutableData, ),
+        implementation = op_dmp
+    ),
+    # dmp   value
+    Instruction(
+        operation = Operation.DMP,
+        signature = (Any, ),
+        implementation = op_dmp
+    ),
 ] 
 
 def _build_operations_cache() -> Dict[Operation, List[Instruction]]:
@@ -178,6 +157,12 @@ operations = _build_operations_cache()
 
 def is_instruction_implemented(op_code: Operation) -> bool:
     return op_code in operations
+
+def find_instruction(op_code: Operation) -> Instruction:
+    if not is_instruction_implemented(op_code):
+        raise Exception(f"operation {op_code} not implemented")
+        
+    return operations[op_code][0]
 
 def calculate_max_params(op_code: Operation) -> int:
     n_params = 0

@@ -22,8 +22,10 @@ class Registers(Enum):
 
 class Register(MutableData):
     def __init__(self, name: str):
-        self.Name = name
         super().__init__()
+        self.Name = name
+        self._value = 0
+        
 
     def __repr__(self):
         return f"<REG: {self.Name}>"

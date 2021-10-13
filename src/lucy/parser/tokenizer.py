@@ -1,44 +1,8 @@
-from dataclasses import dataclass
 from typing import Union, List
-from enum import Enum
-from ..core.data import MutableData
 from ..core.register import Registers
-from ..core.instructions import Operation
+from ..core.operation import Operation
 from ..core.stack import Stack
-
-counter = 0
-def auto():
-    global counter
-    tmp = counter
-    counter += 1
-    return tmp
-
-class TokenType(Enum):
-    # For jump loops, start with : (e.g: ':loop')
-    CHECKPOINT      = auto()
-    # goto name
-    GOTO            = auto()
-    # Primitive datas (int, float, string, byte, etc)
-    DATA            = auto()
-    # mov, push, pop, etc
-    INSTRUCTION     = auto()
-    # rax, rbx, rcx, etc
-    REGISTER        = auto()
-    # for comment lines starting in ;
-    COMMENT         = auto()
-
-@dataclass
-class Token(object):
-    typ: TokenType
-    value: Union[MutableData, Registers, Operation, str, int, float]
-
-    def __repr__(self):
-        return f"<{self.typ.name} value = {self.value}>"
-
-class Tokens:
-    DOUBLE_QUOTE = '"'
-    COLON = ':'
-    SEMI_COLON = ';'
+from .token import Token, TokenType, Tokens
 
 class LucyTokenizer(object):
     def __init__(self, stream: str):
@@ -81,8 +45,7 @@ class LucyTokenizer(object):
             elif self.is_goto(raw):
                 return self._tokenize_goto(raw)
             else:
-                raise Exception("Invalid token")
-                exit(1)
+                raise Exception(f"invalid token: {raw}")
 
     def _read(self) -> str:
         char = self._stream[self._cursor]
@@ -107,7 +70,7 @@ class LucyTokenizer(object):
     def _read_raw(self) -> str:
         raw: str = ""
         
-        while (c := self._consume_char()) not in [' ', ',', '\n', '\r']:
+        while self._cursor < len(self._stream) and (c := self._consume_char()) not in [' ', ',', '\n', '\r', '\t']:
             raw += c
 
         if len(raw) > 0:
